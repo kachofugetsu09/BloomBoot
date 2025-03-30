@@ -13,10 +13,20 @@ public class BeanDefinition {
         @Getter
         @Setter
         private String scope;
+        private boolean isLazy = false;
 
 
                 public BeanDefinition(Class beanClass){
                     this.beanClass = beanClass;
                     this.scope = SCOPE_SINGLETON;
                 }
+
+    public boolean isSingleton() {
+                    return SCOPE_SINGLETON.equals(scope);
+    }
+
+    public boolean isLazyInit() {
+                    return isLazy;
+
+    }
 }

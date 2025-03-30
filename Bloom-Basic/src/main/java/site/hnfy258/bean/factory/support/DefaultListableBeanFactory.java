@@ -28,4 +28,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public boolean containsBeanDefinition(String autoScanTestApp) {
                 return beanDefinitionMap.containsKey(autoScanTestApp);
     }
+
+    @Override
+    public Object getBean(Class<?> beanClass) throws BeansException {
+                return getBean(beanClass.getName());
+    }
 }

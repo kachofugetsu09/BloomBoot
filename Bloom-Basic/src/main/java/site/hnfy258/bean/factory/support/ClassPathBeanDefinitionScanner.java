@@ -11,7 +11,6 @@ import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -138,6 +137,7 @@ public class ClassPathBeanDefinitionScanner implements ClassPathScanner {
         processBeanAnnotation(clazz, Bean.class);
         processBeanAnnotation(clazz, Repository.class);
         processBeanAnnotation(clazz, Resource.class);
+        processBeanAnnotation(clazz, Service.class);
     }
 
     private <T extends Annotation> void processBeanAnnotation(Class<?> clazz, Class<T> annotationType) {
@@ -166,7 +166,3 @@ public class ClassPathBeanDefinitionScanner implements ClassPathScanner {
         }
     }
 }
-
-
-
-
