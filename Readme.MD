@@ -9,10 +9,14 @@
 ### Bean 基础功能
 - [x] Bean 的注册机制
 - [x] Bean 工厂实现
-- [ ] `@Autowired` 注解支持
-- [ ] `@Component` 注解支持
-- [ ] `@Resource` 注解支持
+
+- [x] `@Component` 注解支持
+- [x] `@Bean` 注解支持
+- [x] `@Repository` 注解支持
+- [x] `@Scope` 注解支持
+- [x] `@Resource` 注解支持
 - [ ] `@Service` 注解支持
+- [ ] `@Autowired` 注解支持
 - [ ] 消费组/监听组注解
 - [ ] 循环依赖解决方案
 - [ ] 类型转换工厂

@@ -13,7 +13,7 @@ public class DefaultSingletonBeanREgistery implements SingletonBeanRegistry {
                     return singletonObjects.put(beanName,singletonObject);
                 }
 
-            
+
             @Override
             public Object getSingleton(String beanName) {
                 return singletonObjects.get(beanName);
