@@ -1,5 +1,6 @@
 package site.hnfy258.bean.factory.support;
 
+import site.hnfy258.bean.factory.ObjectFactory;
 import site.hnfy258.bean.factory.config.BeanDefinition;
 import site.hnfy258.bean.factory.config.BeanDefinitionRegistry;
 import site.hnfy258.bean.factory.config.BeanPostProcessor;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements BeanDefinitionRegistry {
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
+
 
     /**
      * 根据bean名称获取对应的BeanDefinition。

@@ -28,7 +28,7 @@ public interface ApplicationContext extends BeanFactory {
      * 关闭应用上下文，释放所有资源。
      * 调用此方法后，应用上下文将不再可用。
      */
-    void close();
+    void close() throws BeansException;
 
     /**
      * 设置当前应用的名称。
@@ -36,4 +36,7 @@ public interface ApplicationContext extends BeanFactory {
      * @param applicationName 要设置的应用名称。
      */
     void setApplicationName(String applicationName);
+
+
+    public void registerShutdownHook();
 }

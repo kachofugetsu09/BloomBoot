@@ -1,9 +1,11 @@
 package site.hnfy258.bean.factory.support;
 
+import site.hnfy258.bean.factory.DisposableBean;
 import site.hnfy258.bean.factory.annotation.Autowired;
 import site.hnfy258.bean.factory.annotation.PostConstruct;
 import site.hnfy258.bean.factory.config.BeanDefinition;
 import site.hnfy258.bean.factory.config.BeanPostProcessor;
+import site.hnfy258.bean.factory.config.InstantiationAwareBeanPostProcessor;
 import site.hnfy258.common.exceptions.BeansException;
 
 import java.lang.reflect.Field;
@@ -55,6 +57,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             // 1. 创建实例
             bean = createBeanInstance(beanName, beanDefinition);
 
+            if(beanDefinition.isSingleton()){
+                Object finalBean = bean;
+                addSingletonFactory(beanName, ()->getEarlyBeanReference(beanName,beanDefinition,finalBean));
+            }
+
             // 2. 依赖注入
             applyPropertyValues(bean);
 
@@ -70,10 +77,29 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             // 6. 添加到单例池
             addSingleton(beanName, bean);
 
+            registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
+
+
             return bean;
         } catch (Exception e) {
             throw new BeansException("Instantiation of bean failed: " + beanName, e);
         }
+    }
+
+    private void addSingleton(String beanName, Object singletonObject) {
+        registerSingleton(beanName, singletonObject);
+    }
+
+    protected Object getEarlyBeanReference(String beanName, BeanDefinition beanDefinition, Object bean) {
+        Object exposedObject = bean;
+        for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
+            if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
+                exposedObject = ((InstantiationAwareBeanPostProcessor) beanPostProcessor).getEarlyBeanReference(exposedObject, beanName);
+                if (null == exposedObject) return exposedObject;
+            }
+        }
+
+        return exposedObject;
     }
 
     /**
@@ -214,6 +240,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                     System.err.println("Error setting field: " + fieldName);
                     throw new BeansException("Error setting field " + fieldName, e);
                 }
+            }
+        }
+
+
+    }
+    protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+        // 只有单例Bean才需要注册销毁方法
+        if (beanDefinition.isSingleton()) {
+            if (bean instanceof DisposableBean) {
+                registerDisposableBean(beanName, (DisposableBean) bean);
             }
         }
     }

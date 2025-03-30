@@ -6,17 +6,19 @@ import site.hnfy258.bean.factory.annotation.Service;
 
 @Service
 public class UserService {
-
     @Autowired
-    private UserRepository userRepository;
-
+    private OrderService orderService;
+    
+    private String username;
+    
     @PostConstruct
     public void init() {
-        System.out.println("UserService 初始化完成!");
+        this.username = "defaultUser";
+        System.out.println("===============UserService初始化=============" );
+        System.out.println("UserService 初始化 with username: " + username);
     }
-
-    public void findUser(String id) {
-        System.out.println("UserService 查找用户: " + id);
-        userRepository.findById(id);
+    
+    public String getUserInfo() {
+        return "User: " + username + ", Orders: " + orderService.getOrderCount();
     }
 }

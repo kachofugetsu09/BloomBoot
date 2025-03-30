@@ -163,8 +163,8 @@ public class BloomBootApplicationContext implements ApplicationContext {
      * 关闭应用上下文，执行清理工作。
      */
     @Override
-    public void close() {
-        // TODO: 关闭容器，执行销毁方法等清理工作
+    public void close() throws BeansException {
+        beanFactory.destroySingletons();
         System.out.println("关闭BloomBoot上下文");
     }
 
@@ -176,6 +176,17 @@ public class BloomBootApplicationContext implements ApplicationContext {
     @Override
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
+    }
+
+    @Override
+    public void registerShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                close();
+            } catch (BeansException e) {
+                throw new RuntimeException(e);
+            }
+        }));
     }
 
     /**
