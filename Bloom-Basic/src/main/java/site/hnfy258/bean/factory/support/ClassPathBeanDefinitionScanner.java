@@ -33,9 +33,13 @@ public class ClassPathBeanDefinitionScanner implements ClassPathScanner {
             }
         }
 
+        System.out.println("开始扫描包: " + String.join(", ", basePackages));
         for (String basePackage : basePackages) {
             scanPackage(basePackage);
         }
+
+        // 输出扫描结果
+        System.out.println("包扫描完成，共发现 " + beanFactory.getBeanDefinitionNames().length + " 个Bean定义");
     }
 
 
