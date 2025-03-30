@@ -11,12 +11,19 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 抽象类，提供自动装配能力的Bean工厂实现。
+ * 该类继承自AbstractBeanFactory，负责Bean的创建、依赖注入、初始化等操作。
+ */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
     private InstantiationStrategy instantiationStrategy = new SmartInstaniateStrategy();
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
     /**
-     * 添加一个BeanPostProcessor到这个工厂
+     * 添加一个BeanPostProcessor到工厂中。
+     * 如果该处理器已经存在，则先移除再添加，避免重复。
+     *
+     * @param beanPostProcessor 要添加的BeanPostProcessor
      */
     public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
         this.beanPostProcessors.remove(beanPostProcessor); // 避免重复添加
@@ -24,12 +31,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
-     * 获取所有注册的BeanPostProcessors
+     * 获取所有已注册的BeanPostProcessors。
+     *
+     * @return 返回所有已注册的BeanPostProcessors列表
      */
     public List<BeanPostProcessor> getBeanPostProcessors() {
         return this.beanPostProcessors;
     }
 
+    /**
+     * 创建并初始化一个Bean实例。
+     * 该过程包括实例化、依赖注入、初始化方法调用以及BeanPostProcessor的处理。
+     *
+     * @param beanName       Bean的名称
+     * @param beanDefinition Bean的定义信息
+     * @return 返回创建并初始化后的Bean实例
+     * @throws BeansException 如果Bean创建或初始化失败，抛出此异常
+     */
     @Override
     protected Object createBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
         Object bean = null;
@@ -59,7 +77,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
-     * 在bean初始化之前应用所有已注册的BeanPostProcessors
+     * 在Bean初始化之前应用所有已注册的BeanPostProcessors。
+     *
+     * @param existingBean 当前Bean实例
+     * @param beanName     Bean的名称
+     * @return 返回经过前置处理后的Bean实例
+     * @throws BeansException 如果处理过程中发生异常，抛出此异常
      */
     public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
             throws BeansException {
@@ -75,7 +98,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
-     * 在bean初始化之后应用所有已注册的BeanPostProcessors
+     * 在Bean初始化之后应用所有已注册的BeanPostProcessors。
+     *
+     * @param existingBean 当前Bean实例
+     * @param beanName     Bean的名称
+     * @return 返回经过后置处理后的Bean实例
+     * @throws BeansException 如果处理过程中发生异常，抛出此异常
      */
     public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
             throws BeansException {
@@ -91,7 +119,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
-     * 调用带有@PostConstruct注解的初始化方法
+     * 调用带有@PostConstruct注解的初始化方法。
+     * 该方法会遍历当前类及其所有父类，查找并执行带有@PostConstruct注解的方法。
+     *
+     * @param bean 要执行初始化方法的Bean实例
      */
     private void invokeInitMethods(Object bean) {
         Class<?> clazz = bean.getClass();
@@ -115,14 +146,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
-     * 创建bean实例
+     * 创建Bean实例。
+     *
+     * @param beanName       Bean的名称
+     * @param beanDefinition Bean的定义信息
+     * @return 返回创建的Bean实例
+     * @throws BeansException 如果实例化失败，抛出此异常
      */
     private Object createBeanInstance(String beanName, BeanDefinition beanDefinition) throws BeansException {
         return instantiationStrategy.instantiate(beanDefinition, beanName);
     }
 
     /**
-     * 处理属性注入
+     * 处理Bean的属性注入。
+     * 该方法会遍历当前类及其所有父类，查找带有@Autowired注解的字段并进行依赖注入。
+     *
+     * @param bean 要注入属性的Bean实例
+     * @throws BeansException 如果依赖注入失败，抛出此异常
      */
     private void applyPropertyValues(Object bean) throws BeansException {
         Class<?> beanClass = bean.getClass();
@@ -136,7 +176,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     /**
-     * 对特定类的字段进行依赖注入
+     * 对特定类的字段进行依赖注入。
+     * 该方法会查找带有@Autowired注解的字段，并尝试按名称或类型获取依赖的Bean实例进行注入。
+     *
+     * @param bean  要注入属性的Bean实例
+     * @param clazz 要处理的类
+     * @throws BeansException 如果依赖注入失败，抛出此异常
      */
     private void injectFieldsForClass(Object bean, Class<?> clazz) throws BeansException {
         for (Field field : clazz.getDeclaredFields()) {

@@ -14,16 +14,28 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * ClassPathBeanDefinitionScanner 类用于扫描指定包路径下的类，并根据注解生成Bean定义。
+ */
 public class ClassPathBeanDefinitionScanner implements ClassPathScanner {
     private final DefaultListableBeanFactory beanFactory;
 
+    /**
+     * 构造函数，初始化ClassPathBeanDefinitionScanner。
+     *
+     * @param beanFactory 用于注册Bean定义的工厂实例
+     */
     public ClassPathBeanDefinitionScanner(DefaultListableBeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
 
+    /**
+     * 扫描指定的包路径，查找带有特定注解的类，并生成Bean定义。
+     *
+     * @param basePackages 要扫描的包路径数组，如果为空，则尝试获取主类所在的包
+     */
     @Override
     public void scan(String... basePackages) {
-        // 如果没有指定包，则扫描调用类所在的包
         if (basePackages == null || basePackages.length == 0) {
             String mainPackage = getMainClassPackage();
             if (mainPackage != null) {
@@ -38,12 +50,14 @@ public class ClassPathBeanDefinitionScanner implements ClassPathScanner {
             scanPackage(basePackage);
         }
 
-        // 输出扫描结果
         System.out.println("包扫描完成，共发现 " + beanFactory.getBeanDefinitionNames().length + " 个Bean定义");
     }
 
-
-
+    /**
+     * 获取主类所在的包名。
+     *
+     * @return 主类所在的包名，如果找不到则返回null
+     */
     private String getMainClassPackage() {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (StackTraceElement element : stackTrace) {
@@ -55,27 +69,33 @@ public class ClassPathBeanDefinitionScanner implements ClassPathScanner {
                     }
                 }
             } catch (ClassNotFoundException e) {
+                throw new RuntimeException("无法加载类: " + element.getClassName(), e);
             }
         }
         return null;
     }
 
-
+    /**
+     * 扫描指定包路径下的所有类文件。
+     *
+     * @param basePackage 要扫描的包路径
+     */
     private void scanPackage(String basePackage) {
         String path = basePackage.replace(".", "/");
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         try {
             Enumeration<URL> resources = classLoader.getResources(path);
+            if (resources == null) {
+                throw new RuntimeException("无法获取资源: " + path);
+            }
             while (resources.hasMoreElements()) {
                 URL resource = resources.nextElement();
                 String protocol = resource.getProtocol();
 
                 if ("file".equals(protocol)) {
-                    // 处理文件系统中的类
                     scanDirectory(new File(resource.getFile()), basePackage);
                 } else if ("jar".equals(protocol)) {
-                    // 处理JAR包中的类
                     scanJarPackage(resource, basePackage);
                 }
             }
@@ -84,6 +104,12 @@ public class ClassPathBeanDefinitionScanner implements ClassPathScanner {
         }
     }
 
+    /**
+     * 扫描指定目录下的所有类文件，并处理带有特定注解的类。
+     *
+     * @param directory   要扫描的目录
+     * @param packageName 当前扫描的包名
+     */
     private void scanDirectory(File directory, String packageName) {
         if (!directory.exists()) {
             return;
@@ -95,60 +121,75 @@ public class ClassPathBeanDefinitionScanner implements ClassPathScanner {
         for (File file : files) {
             String fileName = file.getName();
             if (file.isDirectory()) {
-                // 递归扫描子目录
                 scanDirectory(file, packageName + "." + fileName);
             } else if (fileName.endsWith(".class")) {
                 try {
-                    // 获取类名并加载类
                     String className = packageName + "." + fileName.substring(0, fileName.length() - 6);
                     Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
                     processAnnotations(clazz);
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException("无法加载类: " + packageName + "." + fileName, e);
                 }
             }
         }
     }
 
+    /**
+     * 扫描JAR包中的类文件，并处理带有特定注解的类。
+     *
+     * @param url         JAR包的URL
+     * @param packageName 要扫描的包名
+     * @throws IOException 如果读取JAR包时发生错误
+     */
     private void scanJarPackage(URL url, String packageName) throws IOException {
-        JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
-        JarFile jarFile = jarURLConnection.getJarFile();
+        try (JarFile jarFile = ((JarURLConnection) url.openConnection()).getJarFile()) {
+            Enumeration<JarEntry> jarEntries = jarFile.entries();
+            String packagePath = packageName.replace('.', '/');
 
-        Enumeration<JarEntry> jarEntries = jarFile.entries();
-        String packagePath = packageName.replace('.', '/');
+            while (jarEntries.hasMoreElements()) {
+                JarEntry jarEntry = jarEntries.nextElement();
+                String entryName = jarEntry.getName();
 
-        while (jarEntries.hasMoreElements()) {
-            JarEntry jarEntry = jarEntries.nextElement();
-            String entryName = jarEntry.getName();
-
-            // 检查是否属于指定的包
-            if (entryName.startsWith(packagePath) && entryName.endsWith(".class")) {
-                // 将路径转换为类名
-                String className = entryName.replace('/', '.').substring(0, entryName.length() - 6);
-                try {
-                    Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
-                    processAnnotations(clazz);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                if (entryName.startsWith(packagePath) && entryName.endsWith(".class")) {
+                    String className = entryName.replace('/', '.').substring(0, entryName.length() - 6);
+                    try {
+                        Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+                        processAnnotations(clazz);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException("无法加载类: " + className, e);
+                    }
                 }
             }
         }
     }
 
+    /**
+     * 处理类上的注解，如果类带有特定注解，则生成Bean定义。
+     *
+     * @param clazz 要处理的类
+     */
     private void processAnnotations(Class<?> clazz) {
-        // 处理所有支持的注解
-        processBeanAnnotation(clazz, Component.class);
-        processBeanAnnotation(clazz, Bean.class);
-        processBeanAnnotation(clazz, Repository.class);
-        processBeanAnnotation(clazz, Resource.class);
-        processBeanAnnotation(clazz, Service.class);
+        Annotation[] annotations = clazz.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof Component || annotation instanceof Bean ||
+                annotation instanceof Repository || annotation instanceof Resource ||
+                annotation instanceof Service) {
+                processBeanAnnotation(clazz, annotation.annotationType());
+            }
+        }
     }
 
+    /**
+     * 处理带有特定注解的类，生成Bean定义并注册到BeanFactory中。
+     *
+     * @param clazz          要处理的类
+     * @param annotationType 注解类型
+     * @param <T>            注解类型
+     */
     private <T extends Annotation> void processBeanAnnotation(Class<?> clazz, Class<T> annotationType) {
         if (clazz.isAnnotationPresent(annotationType)) {
             BeanDefinition beanDefinition = new BeanDefinition(clazz);
 
-            // 设置作用域
             if (clazz.isAnnotationPresent(Scope.class)) {
                 beanDefinition.setScope(clazz.getAnnotation(Scope.class).value());
             } else {
