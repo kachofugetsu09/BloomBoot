@@ -4,7 +4,7 @@ import site.hnfy258.bean.factory.config.BeanDefinition;
 import site.hnfy258.bean.factory.config.BeanFactory;
 import site.hnfy258.common.exceptions.BeansException;
 
-public  abstract class AbstractBeanFactory extends DefaultSingletonBeanREgistery implements BeanFactory {
+public  abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistery implements BeanFactory {
             @Override
             public Object getBean(String beanName) throws BeansException {
                 Object bean = null;

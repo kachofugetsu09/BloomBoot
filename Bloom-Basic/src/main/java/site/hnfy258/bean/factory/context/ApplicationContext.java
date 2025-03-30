@@ -12,4 +12,6 @@ public interface ApplicationContext extends BeanFactory {
     // 关闭容器
     void close();
 
+
+    void setApplicationName(String applicationName);
 }

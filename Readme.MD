@@ -15,12 +15,12 @@
 - [x] `@Repository` 注解支持
 - [x] `@Scope` 注解支持
 - [x] `@Resource` 注解支持
-- [ ] `@Service` 注解支持
-- [ ] `@Autowired` 注解支持
+- [x] `@Service` 注解支持
+- [x] `@Autowired` 注解支持
 - [ ] 消费组/监听组注解
 - [ ] 循环依赖解决方案
 - [ ] 类型转换工厂
-- [ ] Bean 的动态实例化
+- [x] Bean 的动态实例化
 - [ ] Bean 的初始化和销毁方法
 
 ### 特色功能
