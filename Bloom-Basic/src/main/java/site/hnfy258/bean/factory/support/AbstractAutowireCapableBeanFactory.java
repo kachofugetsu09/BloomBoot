@@ -159,8 +159,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                     try {
                         method.setAccessible(true);
                         method.invoke(bean);
-                        System.out.println("Executed @PostConstruct method: " + method.getName() +
-                                " in class: " + clazz.getName());
+                        System.out.println("执行@PostConstruct方法: " + method.getName() +
+                                " 在类: " + clazz.getName());
                     } catch (Exception e) {
                         throw new RuntimeException("Error executing @PostConstruct method", e);
                     }
@@ -213,21 +213,21 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         for (Field field : clazz.getDeclaredFields()) {
             if (field.isAnnotationPresent(Autowired.class)) {
                 String fieldName = field.getName();
-                System.out.println("Found @Autowired field: " + fieldName + " in class: " + clazz.getName());
+                System.out.println("发现需要自动注入的字段: " + fieldName + " 在类: " + clazz.getName());
 
                 Object dependencyBean = null;
                 try {
                     // 尝试先按名称获取
                     dependencyBean = getBean(fieldName);
-                    System.out.println("Retrieved autowired bean by name: " + fieldName);
+                    System.out.println("已通过名称注入依赖: " + fieldName);
                 } catch (Exception e) {
                     // 如果按名称获取失败，则尝试按类型获取
                     try {
                         dependencyBean = getBean(field.getType());
-                        System.out.println("Retrieved autowired bean by type: " + field.getType().getName());
+                        System.out.println("已通过类型注入依赖: " + field.getType().getName());
                     } catch (Exception ex) {
-                        System.err.println("Failed to get autowired bean: " + fieldName);
-                        throw new BeansException("Failed to get autowired bean: " + fieldName, ex);
+                        System.err.println("无法获取需要注入的依赖: " + fieldName);
+                        throw new BeansException("无法获取需要注入的依赖: " + fieldName, ex);
                     }
                 }
 
@@ -235,15 +235,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                 try {
                     // 设置字段值
                     field.set(bean, dependencyBean);
-                    System.out.println("Successfully set autowired field: " + fieldName);
+                    System.out.println("成功注入字段: " + fieldName);
                 } catch (IllegalAccessException e) {
-                    System.err.println("Error setting field: " + fieldName);
-                    throw new BeansException("Error setting field " + fieldName, e);
+                    System.err.println("设置字段值时出错: " + fieldName);
+                    throw new BeansException("设置字段值时出错: " + fieldName, e);
                 }
             }
         }
-
-
     }
     protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
         // 只有单例Bean才需要注册销毁方法

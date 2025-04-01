@@ -106,7 +106,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 try {
                     // 提前实例化单例bean
                     getBean(beanName);
-                    System.out.println("Pre-instantiated singleton bean: " + beanName);
+                    System.out.println("提前实例化" + beanName);
                 } catch (Exception e) {
                     System.err.println("Failed to pre-instantiate singleton bean: " + beanName);
                     e.printStackTrace();

@@ -1,10 +1,13 @@
 package site.hnfy258.bean;
 
+import site.hnfy258.bean.factory.annotation.Autowired;
 import site.hnfy258.bean.factory.annotation.PostConstruct;
 import site.hnfy258.bean.factory.annotation.Service;
 
 @Service
 public class OrderService {
+    @Autowired
+    private UserService userService;
     private int orderCount;
     
     @PostConstruct
