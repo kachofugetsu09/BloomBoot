@@ -20,4 +20,10 @@ public class OrderService {
     public int getOrderCount() {
         return orderCount;
     }
+
+    public void createOrder(String productName) {
+        System.out.println("正在执行 OrderService.createOrder 方法");
+        System.out.println("创建订单: " + productName);
+        orderCount++;
+    }
 }

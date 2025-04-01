@@ -10,5 +10,6 @@ public class BloomBootDemo {
         // 启动应用
         BloomApplication.run(BloomBootDemo.class, args);
         System.out.println("BloomBoot应用已启动!");
+
     }
 }
