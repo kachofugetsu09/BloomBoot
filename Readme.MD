@@ -18,7 +18,6 @@
 - [x] `@Service` 注解支持
 - [x] `@Autowired` 注解支持
 - [x] `BloomBoot` 注解支持
-- [ ] 消费组/监听组注解
 - [x] 循环依赖解决方案
 - [x] Bean 的动态实例化
 - [x] Bean 的初始化和销毁方法
@@ -29,6 +28,6 @@
 - [ ] 细粒度的 Bean 加载控制注解
 
 ### AOP 相关功能
-- [ ] 基于 JDK 动态代理实现 AOP
-- [ ] 基于 CGLib 实现 AOP
-- [ ] 将 AOP 扩展到 Bean 生命周期中
+- [x] 基于 JDK 动态代理实现 AOP
+- [x] 基于 CGLib 实现 AOP
+- [x] 将 AOP 扩展到 Bean 生命周期中
